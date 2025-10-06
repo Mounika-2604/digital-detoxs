@@ -434,7 +434,7 @@ function syncTimeWithBackend() {
   
   console.log('SYNCING TO BACKEND:', usage);
   
-  fetch('http://localhost:3001/api/track-time-extension', {
+  fetch('http://digital-detoxs.onrender.com/api/track-time-extension', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
