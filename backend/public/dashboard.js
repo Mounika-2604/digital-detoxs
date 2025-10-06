@@ -1,5 +1,5 @@
 const API_CONFIG = {
-    BASE_URL: 'http://localhost:3001',
+    BASE_URL: 'https://digital-detoxs.onrender.com',
     REFRESH_INTERVAL: 30000
 };
 

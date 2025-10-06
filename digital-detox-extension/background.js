@@ -1,5 +1,5 @@
 // background.js - COMPLETE FIXED VERSION
-const BACKEND_URL = 'http://localhost:3001/api';
+const BACKEND_URL = 'https://digital-detoxs.onrender.com';
 const BLOCKED_SITES = ['instagram.com', 'tiktok.com', 'youtube.com', 'facebook.com', 'twitter.com', 'reddit.com', 'netflix.com'];
 
 const SITE_TO_APP_ID = {
@@ -95,7 +95,7 @@ function startContinuousTracking() {
   
   console.log('Continuous tracking started');
 }
-
+const API_URL = 'https://digital-detoxs.onrender.com/api';
 async function loadStoredData() {
   return new Promise((resolve) => {
     chrome.storage.local.get(['userId', 'dailyUsage', 'dailyLimits', 'lastResetDate', 'isBlocking'], (data) => {

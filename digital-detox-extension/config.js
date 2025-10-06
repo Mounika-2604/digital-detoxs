@@ -1,5 +1,4 @@
-const API_URL = 'http://localhost:3001';
-
+const API_URL = 'https://digital-detoxs.onrender.com/api';
 const config = {
   apiUrl: API_URL,
   endpoints: {
