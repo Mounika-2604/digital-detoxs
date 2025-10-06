@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limit Reached - Digital Detox</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 20px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .stats-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .app-name {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .usage-stats {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.2);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #ff6b6b, #ee5a6f);
+            height: 100%;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .quote-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-style: italic;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .emergency-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .emergency-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .emergency-form {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .btn-emergency {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-emergency:hover {
+            background: #f57c00;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .result.success {
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .result.error {
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .timer {
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🛑</div>
+        <h1>Daily Limit Reached</h1>
+        <p class="subtitle">Time to take a break and do something else</p>
+
+        <div class="stats-card">
+            <div class="app-name" id="appName">Instagram</div>
+            <div class="usage-stats">
+                You've used <strong><span id="usedTime">30</span> minutes</strong> today<br>
+                Your daily limit: <strong><span id="limitTime">30</span> minutes</strong>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 100%">100%</div>
+            </div>
+            <div class="timer" id="resetTimer">Resets in 8 hours</div>
+        </div>
+
+        <div class="quote-box" id="motivationalQuote">
+            "The time you enjoy wasting is not wasted time, but the time you spend scrolling mindlessly? That's time you'll never get back."
+        </div>
+
+        <div class="actions">
+            <a href="http://localhost:3001/dashboard.html" class="btn btn-primary">
+                View Full Dashboard
+            </a>
+            <button class="btn btn-secondary" onclick="window.close()">
+                Close Tab
+            </button>
+        </div>
+
+        <div class="emergency-section">
+            <div class="emergency-title">Need Emergency Access?</div>
+            <div class="emergency-form">
+                <div class="form-group">
+                    <textarea 
+                        id="emergencyReason" 
+                        placeholder="Explain why you need access (minimum 20 characters)&#10;&#10;Examples:&#10;- Need to message client about urgent work matter&#10;- Family emergency - need to contact relative&#10;- Important work project deadline tonight"
+                    ></textarea>
+                </div>
+                <button class="btn btn-emergency" onclick="requestEmergency()">
+                    Request Emergency Access
+                </button>
+                <div id="emergencyResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="blocked.js"></script>
+</body>
+</html>

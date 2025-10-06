@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      background-size: cover;
+      background-position: center;
+      backdrop-filter: blur(5px);
+      padding: 20px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 420px;
+      min-width: 200px;
+      background: transparent;
+      border: 2px solid rgba(255,255,255,.5);
+      border-radius: 15px;
+      padding: 30px 40px;
+      box-shadow: 0 0 10px rgba(0,0,0,.2);
+    }
+
+    form h1 {
+      font-size: 35px;
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .wrapper .ib {
+      position: relative;
+      max-width: 100%;
+      margin: 25px 0;
+    }
+
+    .ib input {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      border: 2px solid rgba(222, 148, 207, 0.918);
+      border-radius: 40px;
+      padding: 10px 40px 10px 15px;
+      font-size: 18px;
+    }
+
+    .ib i {
+      position: absolute;
+      right: 20px;
+      top: 12px;
+      font-size: 20px;
+      cursor: pointer;
+      color: gray;
+    }
+
+    button {
+      width: 100%;
+      border-radius: 40px;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0,0,0,0.4);
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .rl {
+      text-align: center;
+      margin: 15px 0 5px;
+      font-size: 15px;
+    }
+
+    .rl p a {
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .rl a {
+      text-decoration: none;
+      color: rgb(61, 57, 52);
+      font-weight: 400;
+    }
+
+    .rl a:hover {
+      text-decoration: underline;
+    }
+
+    /* Mobile Responsive Styles */
+    @media screen and (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+
+      .wrapper {
+        padding: 25px 20px;
+        border-radius: 12px;
+      }
+
+      form h1 {
+        font-size: 28px;
+        margin-bottom: 15px;
+      }
+
+      .wrapper .ib {
+        margin: 20px 0;
+      }
+
+      .ib input {
+        font-size: 16px;
+        padding: 12px 40px 12px 15px;
+      }
+
+      .ib i {
+        right: 15px;
+        top: 13px;
+        font-size: 18px;
+      }
+
+      button {
+        font-size: 15px;
+        padding: 12px;
+      }
+
+      .rl {
+        font-size: 14px;
+        margin: 12px 0 5px;
+      }
+    }
+
+    @media screen and (max-width: 360px) {
+      body {
+        padding: 10px;
+      }
+
+      .wrapper {
+        padding: 20px 15px;
+      }
+
+      form h1 {
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+
+      .wrapper .ib {
+        margin: 18px 0;
+      }
+
+      .ib input {
+        font-size: 14px;
+        padding: 10px 35px 10px 12px;
+      }
+
+      .ib i {
+        right: 12px;
+        top: 11px;
+        font-size: 16px;
+      }
+
+      button {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      .rl {
+        font-size: 13px;
+      }
+    }
+
+    /* Landscape mobile orientation */
+    @media screen and (max-height: 600px) and (orientation: landscape) {
+      body {
+        padding: 10px;
+      }
+
+      .wrapper {
+        padding: 20px 30px;
+      }
+
+      form h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .wrapper .ib {
+        margin: 15px 0;
+      }
+
+      .ib input {
+        padding: 8px 35px 8px 12px;
+      }
+
+      .ib i {
+        top: 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <form id="registerForm">
+      <h1>Register</h1>
+
+      <div class="ib">
+        <input type="text" placeholder="Full Name" required />
+        <i class="bx bx-user"></i>
+      </div>
+
+      <div class="ib">
+        <input type="email" placeholder="Email" required />
+        <i class="bx bx-envelope"></i>
+      </div>
+
+      <div class="ib">
+        <input type="password" id="password" placeholder="Password" required />
+        <i class="fa-solid fa-eye" id="togglePassword"></i>
+      </div>
+
+      <div class="ib">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+        <i class="fa-solid fa-eye" id="toggleConfirmPassword"></i>
+      </div>
+
+      <button type="submit">Register</button>
+
+      <div class="rl">
+        <p>Already have an account? <a href="index.html">Login</a></p>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Toggle password visibility for Password field
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordField = document.getElementById('password');
+      const icon = this;
+      
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    });
+
+    // Toggle password visibility for Confirm Password field
+    document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+      const passwordField = document.getElementById('confirmPassword');
+      const icon = this;
+      
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    });
+  </script>
+  <script src="register.js"></script>
+</body>
+</html>

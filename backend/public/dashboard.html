@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Detox Manager</title>
+   <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+     <div class="refresh-controls">
+    <div id="refresh-indicator"></div>
+    <span id="last-update-time">Loading...</span>
+    <button id="manual-refresh-btn" onclick="manualRefresh()">
+      <span style="transition: transform 0.5s ease;">🔄</span>
+      Refresh
+    </button>
+  </div>
+    <div class="container">
+        <div class="top">
+            <div class="head-section">
+                <p class="head">Digital Detox Manager</p>
+                <p class="sub">Take control of your digital wellness journey</p>
+  
+            </div>
+            <div class="connected-status disconnected" id="connectionStatus">
+                <span class="connected-dot"></span>
+                <span id="connectionText">Disconnected</span>
+            </div>
+        </div>
+
+        <div class="four_boxes">
+            <div class="stat-box">
+                <div class="stat-icon">⏱</div>
+                <p class="stat-value" id="totalToday">0min</p>
+                <p class="stat-label">Total Today</p>
+                <p class="stat-desc">Screen time</p>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">📱</div>
+                <p class="stat-value" id="mostUsed">None</p>
+                <p class="stat-label">Most Used</p>
+                <p class="stat-desc">Top app today</p>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">🔥</div>
+                <p class="stat-value" id="detoxStreak">0 days</p>
+                <p class="stat-label">Detox Streak</p>
+                <p class="stat-desc">Keep it up!</p>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">🎯</div>
+                <p class="stat-value" id="focusTime">0min</p>
+                <p class="stat-label">Focus Time</p>
+                <p class="stat-desc">Productive hours</p>
+            </div>
+        </div>
+        <div class="quick-access-section" style="margin: 30px 0; padding: 25px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 style="margin: 0 0 10px 0; font-size: 24px; color: #333;">Quick Access (Tracked)</h2>
+    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+        Sites opened through these buttons will be time-tracked. Direct visits will NOT be tracked.
+    </p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 15px;">
+        <button data-url="https://www.youtube.com" data-name="YouTube" class="tracked-site-btn" style="padding: 15px; background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s;">
+            YouTube
+        </button>
+        <button data-url="https://www.instagram.com" data-name="Instagram" class="tracked-site-btn" style="padding: 15px; background: linear-gradient(135deg, #E1306C 0%, #C13584 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s;">
+            Instagram
+        </button>
+        <button data-url="https://www.tiktok.com" data-name="TikTok" class="tracked-site-btn" style="padding: 15px; background: linear-gradient(135deg, #000000 0%, #333333 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s;">
+            TikTok
+        </button>
+        <button data-url="https://www.facebook.com" data-name="Facebook" class="tracked-site-btn" style="padding: 15px; background: linear-gradient(135deg, #1877F2 0%, #0D5DBD 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s;">
+            Facebook
+        </button>
+        <button data-url="https://twitter.com" data-name="Twitter" class="tracked-site-btn" style="padding: 15px; background: linear-gradient(135deg, #1DA1F2 0%, #0C85D0 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s;">
+            Twitter
+        </button>
+        <button data-url="https://www.netflix.com" data-name="Netflix" class="tracked-site-btn" style="padding: 15px; background: linear-gradient(135deg, #E50914 0%, #B20710 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s;">
+            Netflix
+        </button>
+        <button data-url="https://www.reddit.com" data-name="Reddit" class="tracked-site-btn" style="padding: 15px; background: linear-gradient(135deg, #FF4500 0%, #CC3700 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s;">
+            Reddit
+        </button>
+    </div>
+    <div style="padding: 12px; background: #FFF3CD; border-radius: 8px; border-left: 4px solid #FFC107; font-size: 13px; color: #856404;">
+        <strong>Note:</strong> Only sites opened through these buttons will count towards your daily limits.
+    </div>
+</div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <h2>📱 Log App Usage</h2>
+                <h3>Track your screen time</h3>
+                
+                <label class="form-label">Select App</label>
+                <select id="appSelect">
+                    <option value="">Choose an app...</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="twitter">Twitter</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="netflix">Netflix</option>
+                </select>
+
+                <label class="form-label">Minutes Used</label>
+                <input type="number" id="minutesInput" placeholder="e.g., 30" min="1">
+
+                <button id="logUsageBtn">Log Usage</button>
+                <p id="usageMsg" class="message"></p>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Start Focus Session</h2>
+                <h3>Block distracting apps and boost productivity</h3>
+                
+                <label class="form-label">Duration (minutes)</label>
+                <input type="number" id="focusDuration" placeholder="e.g., 25" min="1" max="120">
+
+                <button id="startFocusBtn">Start Focus Mode</button>
+                <p id="focusTimer" class="message focus-timer"></p>
+                <p id="motivationMsg" class="message success motivation"></p>
+            </div>
+
+            <div class="card">
+                <h2>⚠ Addiction Rankings</h2>
+                <h3>Apps that need your attention</h3>
+                
+                <div id="rankingsList" class="ranking-list">
+                    <div class="empty-state">
+                        <p>No data yet</p>
+                        <p>Log some usage to see rankings</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Recent Activity</h2>
+                <h3>Your usage history</h3>
+                
+                <div id="historyList" class="history-list">
+                    <div class="empty-state">
+                        <p>No activity yet</p>
+                        <p>Start logging to see history</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🚨 Emergency Access</h2>
+                <h3>Request temporary access to blocked apps</h3>
+                
+                <label class="form-label">Select App</label>
+                <select id="emergencyAppSelect">
+                    <option value="">Choose an app...</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="twitter">Twitter</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="netflix">Netflix</option>
+                </select>
+
+                <label class="form-label">Reason for Access</label>
+                <textarea id="emergencyReason" placeholder="Explain why you need access (work, emergency, family, health...)"></textarea>
+
+                <button id="requestAccessBtn">Request Access</button>
+                <div id="emergencyResult"></div>
+            </div>
+        </div>
+
+        <!-- Floating Chat Button -->
+        <div class="chat-float-btn" id="chatFloatBtn">💬</div>
+
+        <!-- Chat Popup -->
+        <div class="chat-popup" id="chatPopup">
+            <div class="chat-popup-header">
+                <div class="chat-popup-header-left">
+                    <div class="chat-popup-avatar">🤖</div>
+                    <div class="chat-popup-title">
+                        <h3>AI Assistant</h3>
+                        <p>Digital Wellness Coach</p>
+                    </div>
+                </div>
+                <button class="chat-close-btn" id="chatCloseBtn">×</button>
+            </div>
+            <div class="chat-popup-body" id="chatPopupBody">
+                <div class="chat-message assistant">
+                    <div class="ai-avatar">🤖</div>
+                    <span>Hi! I'm your digital wellness assistant. Ask me about your stats, get advice, or just say 'help' to see what I can do!</span>
+                </div>
+            </div>
+            <div class="chat-popup-footer">
+                <div class="chat-input-area">
+                    <input type="text" id="chatPopupInput" placeholder="Ask me anything..." />
+                    <button id="sendPopupChatBtn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <script src="dashboard.js"></script>
+</body>
+</html>

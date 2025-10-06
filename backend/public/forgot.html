@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      padding: 20px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 420px;
+      background: transparent;
+      border: 2px solid rgba(255,255,255,.5);
+      border-radius: 15px;
+      padding: 30px 40px;
+      box-shadow: 0 0 10px rgba(0,0,0,.2);
+    }
+
+    h1 {
+      font-size: 35px;
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .ib {
+      position: relative;
+      margin: 25px 0;
+    }
+
+    .ib input {
+      width: 100%;
+      background: transparent;
+      border: 2px solid rgba(222, 148, 207, 0.918);
+      border-radius: 40px;
+      padding: 10px 15px;
+      font-size: 18px;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      border-radius: 40px;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0,0,0,0.4);
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .message {
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+    }
+
+    .message.success {
+      background-color: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      color: #2e7d32;
+    }
+
+    .message.error {
+      background-color: rgba(244, 67, 54, 0.2);
+      border: 1px solid rgba(244, 67, 54, 0.5);
+      color: #c62828;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      text-decoration: none;
+      color: rgb(61, 57, 52);
+      font-weight: 600;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+
+    .info-text {
+      text-align: center;
+      margin: 15px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Mobile Responsive Styles */
+    @media screen and (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+
+      .wrapper {
+        padding: 25px 20px;
+        border-radius: 12px;
+      }
+
+      h1 {
+        font-size: 28px;
+        margin-bottom: 15px;
+      }
+
+      .ib {
+        margin: 20px 0;
+      }
+
+      .ib input {
+        font-size: 16px;
+        padding: 12px 15px;
+      }
+
+      button {
+        font-size: 15px;
+        padding: 12px;
+      }
+
+      .message {
+        margin: 12px 0;
+        padding: 8px;
+        font-size: 14px;
+      }
+
+      .info-text {
+        font-size: 13px;
+        margin: 12px 0;
+      }
+
+      .back-link {
+        margin-top: 15px;
+        font-size: 14px;
+      }
+    }
+
+    @media screen and (max-width: 360px) {
+      body {
+        padding: 10px;
+      }
+
+      .wrapper {
+        padding: 20px 15px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+
+      .ib {
+        margin: 18px 0;
+      }
+
+      .ib input {
+        font-size: 14px;
+        padding: 10px 12px;
+      }
+
+      button {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      .info-text {
+        font-size: 12px;
+      }
+
+      .back-link {
+        font-size: 13px;
+      }
+    }
+
+    /* Landscape mobile orientation */
+    @media screen and (max-height: 600px) and (orientation: landscape) {
+      body {
+        padding: 10px;
+      }
+
+      .wrapper {
+        padding: 20px 30px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .ib {
+        margin: 15px 0;
+      }
+
+      .message {
+        margin: 10px 0;
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Forgot Password</h1>
+    
+    <div id="messageBox" class="message"></div>
+
+    <!-- Step 1: Enter Email -->
+    <div id="step1" class="step active">
+      <p class="info-text">Enter your registered email to receive OTP</p>
+      <form id="emailForm">
+        <div class="ib">
+          <input type="email" id="emailInput" placeholder="Enter your email" required>
+        </div>
+        <button type="submit">Send OTP</button>
+      </form>
+    </div>
+
+    <!-- Step 2: Enter OTP -->
+    <div id="step2" class="step">
+      <p class="info-text">OTP has been sent to your email. Check your inbox.</p>
+      <form id="otpForm">
+        <div class="ib">
+          <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6" required>
+        </div>
+        <button type="submit">Verify OTP</button>
+        <button type="button" onclick="resendOTP()">Resend OTP</button>
+      </form>
+    </div>
+
+    <!-- Step 3: Reset Password -->
+    <div id="step3" class="step">
+      <p class="info-text">Create your new password</p>
+      <form id="resetForm">
+        <div class="ib">
+          <input type="password" id="newPassword" placeholder="New Password" required>
+        </div>
+        <div class="ib">
+          <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+        </div>
+        <button type="submit">Reset Password</button>
+      </form>
+    </div>
+
+    <div class="back-link">
+      <a href="index.html">← Back to Login</a>
+    </div>
+  </div>
+
+  <script>
+    let userEmail = "";
+
+    function showMessage(message, type) {
+      const messageBox = document.getElementById("messageBox");
+      messageBox.textContent = message;
+      messageBox.className = `message ${type}`;
+      messageBox.style.display = "block";
+      setTimeout(() => {
+        messageBox.style.display = "none";
+      }, 5000);
+    }
+
+    function showStep(stepNumber) {
+      document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+      document.getElementById(`step${stepNumber}`).classList.add('active');
+    }
+
+    // Step 1: Send OTP
+    document.getElementById("emailForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      userEmail = document.getElementById("emailInput").value;
+
+      try {
+        const res = await fetch("/forgot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: userEmail })
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+          showMessage(data.message, "success");
+          showStep(2);
+        } else {
+          showMessage(data.message, "error");
+        }
+      } catch (err) {
+        showMessage("Something went wrong!", "error");
+        console.error(err);
+      }
+    });
+
+    // Step 2: Verify OTP
+    document.getElementById("otpForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const otp = document.getElementById("otpInput").value;
+
+      try {
+        const res = await fetch("/verify-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: userEmail, otp })
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+          showMessage("OTP verified! Now set your new password.", "success");
+          showStep(3);
+        } else {
+          showMessage(data.message, "error");
+        }
+      } catch (err) {
+        showMessage("Something went wrong!", "error");
+        console.error(err);
+      }
+    });
+
+    // Step 3: Reset Password
+    document.getElementById("resetForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const newPassword = document.getElementById("newPassword").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (newPassword !== confirmPassword) {
+        showMessage("Passwords do not match!", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch("/reset-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: userEmail, password: newPassword })
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+          showMessage("Password reset successful! Redirecting to login...", "success");
+          setTimeout(() => {
+            window.location.href = "/index.html";
+          }, 2000);
+        } else {
+          showMessage(data.message, "error");
+        }
+      } catch (err) {
+        showMessage("Something went wrong!", "error");
+        console.error(err);
+      }
+    });
+
+    // Resend OTP
+    async function resendOTP() {
+      try {
+        const res = await fetch("/forgot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: userEmail })
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+          showMessage("New OTP sent to your email!", "success");
+        } else {
+          showMessage(data.message, "error");
+        }
+      } catch (err) {
+        showMessage("Something went wrong!", "error");
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

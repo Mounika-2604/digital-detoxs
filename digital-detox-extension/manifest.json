@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Digital Detox",
+  "version": "1.0",
+  "permissions": ["tabs", "storage", "alarms", "webNavigation"],
+  "host_permissions": [
+    "https://*.instagram.com/*",
+    "https://*.tiktok.com/*",
+    "https://*.youtube.com/*",
+    "https://*.facebook.com/*",
+    "https://*.twitter.com/*",
+    "https://*.netflix.com/*",
+    "https://*.reddit.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+    "matches": [
+      "https://*.instagram.com/*",
+      "https://*.tiktok.com/*",
+      "https://*.youtube.com/*",
+      "https://*.facebook.com/*",
+      "https://*.twitter.com/*",
+      "https://*.netflix.com/*",
+      "https://*.reddit.com/*"
+    ],
+    "js": ["content.js"],
+    "run_at": "document_start"
+  }],
+  "externally_connectable": {
+    "matches": ["http://localhost:*/*"]
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
