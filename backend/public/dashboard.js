@@ -1,5 +1,5 @@
 const API_CONFIG = {
-    BASE_URL: 'https://digital-detoxs.onrender.com',
+    BASE_URL: '',
     REFRESH_INTERVAL: 30000
 };
 
@@ -13,7 +13,27 @@ console.log('Dashboard.js loaded');
 
 function openTrackedSite(url, siteName) {
     console.log('Opening ' + siteName);
-    window.open(url, '_blank');
+    try {
+        if (typeof chrome !== 'undefined' && chrome.runtime && EXTENSION_ID) {
+            chrome.runtime.sendMessage(
+                EXTENSION_ID,
+                { type: 'generateSessionToken' },
+                (response) => {
+                    let finalUrl = url;
+                    if (response && response.token) {
+                        const u = new URL(url);
+                        u.searchParams.set('_st', response.token);
+                        finalUrl = u.toString();
+                    }
+                    window.open(finalUrl, '_blank');
+                }
+            );
+        } else {
+            window.open(url, '_blank');
+        }
+    } catch (e) {
+        window.open(url, '_blank');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

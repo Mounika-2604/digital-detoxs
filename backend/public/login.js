@@ -5,7 +5,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const password = document.querySelector('input[type="password"]').value;
 
   try {
-    const res = await fetch('http://localhost:3001/login', {
+    const res = await fetch('/login', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: 'include',  // IMPORTANT: Add this to send/receive cookies

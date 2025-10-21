@@ -496,7 +496,11 @@ app.post("/reset-password", async (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
+  const sid = req.sessionID;
+  req.session.destroy((err) => {
+    if (sid && res.clearCookie) {
+      res.clearCookie('connect.sid');
+    }
     res.redirect("/index.html");
   });
 });

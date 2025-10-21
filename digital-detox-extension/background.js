@@ -23,6 +23,7 @@ let emergencyAccess = {};
 let trackingInterval = null;
 const websiteOpenedTabs = new Set();
 const sessionTokens = new Map();
+const lastWarningShown = {}; // domain -> timestamp ms
 
 function getDomain(url) {
   try {
@@ -80,6 +81,8 @@ function startContinuousTracking() {
         console.log(`${currentTab.domain}: ${minutes}m ${seconds}s`);
       }
       
+      maybeWarnNearLimit(currentTab.domain);
+
       saveData();
       
       if (shouldBlockDomain(currentTab.domain)) {
@@ -95,7 +98,7 @@ function startContinuousTracking() {
   
   console.log('Continuous tracking started');
 }
-const API_URL = 'https://digital-detoxs.onrender.com/api';
+const API_URL = `${BACKEND_URL}/api`;
 async function loadStoredData() {
   return new Promise((resolve) => {
     chrome.storage.local.get(['userId', 'dailyUsage', 'dailyLimits', 'lastResetDate', 'isBlocking'], (data) => {
@@ -108,6 +111,8 @@ async function loadStoredData() {
       if (data.lastResetDate !== today) {
         dailyUsage = {};
         chrome.storage.local.set({ dailyUsage: {}, lastResetDate: today });
+        // Reset in-memory warning state on new day
+        for (const key in lastWarningShown) delete lastWarningShown[key];
       }
       
       console.log('Loaded data:', { userId, dailyUsage, dailyLimits });
@@ -198,6 +203,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     emergencyAccess = {};
     blockedSites.clear();
     websiteOpenedTabs.clear();
+    for (const key in lastWarningShown) delete lastWarningShown[key];
     
     chrome.storage.local.remove(['userId', 'userEmail', 'dailyUsage']);
     updateBlockingRules();
@@ -269,9 +275,10 @@ async function handleEmergencyAccess(request) {
 }
 
 function initializeAlarms() {
-  chrome.alarms.create('syncUsage', { periodInMinutes: 0.17 });
+  // Chrome MV3 requires periodInMinutes >= 1
+  chrome.alarms.create('syncUsage', { periodInMinutes: 2 });
   chrome.alarms.create('checkMidnight', { periodInMinutes: 1 });
-  chrome.alarms.create('updateRules', { periodInMinutes: 0.1 });
+  chrome.alarms.create('updateRules', { periodInMinutes: 1 });
 }
 
 chrome.alarms.onAlarm.addListener((alarm) => {
@@ -338,12 +345,10 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
 
 async function stopTracking() {
   if (currentTab && startTime) {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    if (elapsed > 0) {
-      dailyUsage[currentTab.domain] = (dailyUsage[currentTab.domain] || 0) + elapsed;
-      saveData();
-      console.log(`Stopped tracking ${currentTab.domain}: +${elapsed}s`);
-    }
+    // Usage is already incremented each second in the tracking interval.
+    // Avoid double-counting here; just persist and clear state.
+    saveData();
+    console.log(`Stopped tracking ${currentTab.domain}`);
     
     currentTab = null;
     startTime = null;
@@ -386,7 +391,7 @@ async function fetchLimitsFromBackend() {
   console.log('Fetching limits for user:', userId);
   
   try {
-    const response = await fetch(`${BACKEND_URL}/extension/config?userId=${userId}`, { 
+    const response = await fetch(`${BACKEND_URL}/api/extension/config?userId=${userId}`, { 
       credentials: 'include' 
     });
     
@@ -434,7 +439,7 @@ function syncTimeWithBackend() {
   
   console.log('SYNCING TO BACKEND:', usage);
   
-  fetch('http://digital-detoxs.onrender.com/api/track-time-extension', {
+  fetch(`${BACKEND_URL}/api/track-time-extension`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -482,9 +487,15 @@ function redirectToBlockedPage(tabId, domain) {
   
   const blockedUrl = chrome.runtime.getURL(`blocked.html?site=${domain}&usage=${usedMinutes}&limit=${limitMinutes}`);
   
-  chrome.tabs.update(tabId, { url: blockedUrl }).catch(err => {
+  try {
+    chrome.tabs.update(tabId, { url: blockedUrl }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('Redirect error:', chrome.runtime.lastError.message);
+      }
+    });
+  } catch (err) {
     console.error('Redirect error:', err);
-  });
+  }
 }
 
 async function updateBlockingRules() {
@@ -509,6 +520,29 @@ async function updateBlockingRules() {
     if (domain && blockedSites.has(domain)) {
       redirectToBlockedPage(activeTab.id, domain);
     }
+  }
+}
+
+function maybeWarnNearLimit(domain) {
+  try {
+    const appId = SITE_TO_APP_ID[domain];
+    const limitMinutes = dailyLimits[appId]?.dailyLimit;
+    if (!limitMinutes) return;
+    const usedSeconds = dailyUsage[domain] || 0;
+    const usedMinutes = Math.floor(usedSeconds / 60);
+    const percentage = (usedMinutes / limitMinutes) * 100;
+    const now = Date.now();
+    const lastShown = lastWarningShown[domain] || 0;
+
+    // Warn once per 15 minutes when >= 90% and not already blocked
+    if (percentage >= 90 && !shouldBlockDomain(domain) && now - lastShown > 15 * 60 * 1000) {
+      chrome.tabs.sendMessage(currentTab.id, { action: 'showWarning', minutes: usedMinutes }, () => {
+        // Ignore errors if content script not present on this page
+      });
+      lastWarningShown[domain] = now;
+    }
+  } catch (_) {
+    // best-effort warning
   }
 }
 

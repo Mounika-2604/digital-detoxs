@@ -1,110 +1,220 @@
-// blocked.js - Blocked page script
+// popup.js - Extension popup logic (no UI/layout changes)
 
-const QUOTES = [
-    "The time you enjoy wasting is not wasted time, but the time you spend scrolling mindlessly? That's time you'll never get back.",
-    "You picked up your phone to check one thing. Three hours later, here we are.",
-    "Every scroll is a choice. Choose wisely.",
-    "Your future self will thank you for this break.",
-    "Social media will still be there tomorrow. But this moment? It's gone forever.",
-    "What could you do with 30 extra minutes today? Read? Exercise? Call a friend?",
-    "You're not missing out. You're opting in to something better: real life."
-];
-
-const APP_NAMES = {
-    instagram: 'Instagram',
-    tiktok: 'TikTok',
-    facebook: 'Facebook',
-    twitter: 'Twitter',
-    youtube: 'YouTube',
-    netflix: 'Netflix'
+const DOMAIN_TO_APP_ID = {
+  'instagram.com': 'instagram',
+  'tiktok.com': 'tiktok',
+  'youtube.com': 'youtube',
+  'facebook.com': 'facebook',
+  'twitter.com': 'twitter',
+  'reddit.com': 'reddit',
+  'netflix.com': 'netflix'
 };
 
-// Initialize page
-window.addEventListener('load', () => {
-    const params = new URLSearchParams(window.location.search);
-    const site = params.get('site') || 'instagram.com';
-    const used = parseInt(params.get('usage')) || 0;
-    const limit = parseInt(params.get('limit')) || 60;
+const APP_ID_TO_NAME = {
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  youtube: 'YouTube',
+  facebook: 'Facebook',
+  twitter: 'Twitter',
+  reddit: 'Reddit',
+  netflix: 'Netflix'
+};
 
-    // Extract app name from site
-    const appId = site.replace('.com', '');
-    const appName = APP_NAMES[appId] || appId.charAt(0).toUpperCase() + appId.slice(1);
+const APP_ID_TO_DOMAIN = Object.fromEntries(
+  Object.entries(DOMAIN_TO_APP_ID).map(([domain, appId]) => [appId, domain])
+);
 
-    // Update display
-    document.getElementById('appName').textContent = appName;
-    document.getElementById('usedTime').textContent = used;
-    document.getElementById('limitTime').textContent = limit;
+let cachedStatus = {
+  dailyUsage: {},
+  dailyLimits: {},
+  isBlocking: true,
+  userId: null
+};
 
-    const percentage = Math.min(Math.round((used / limit) * 100), 100);
-    document.getElementById('progressBar').style.width = percentage + '%';
-    document.getElementById('progressBar').textContent = percentage + '%';
-
-    // Show random quote
-    const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-    document.getElementById('motivationalQuote').textContent = randomQuote;
-
-    // Calculate time until reset
-    updateResetTimer();
-    setInterval(updateResetTimer, 60000);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
 });
 
-function updateResetTimer() {
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-    
-    const diff = midnight - now;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    document.getElementById('resetTimer').textContent = 
-        `Resets in ${hours} hours and ${minutes} minutes`;
+function init() {
+  // Sections
+  const loadingSection = document.getElementById('loadingSection');
+  const loginSection = document.getElementById('loginSection');
+  const mainSection = document.getElementById('mainSection');
+  if (loadingSection) loadingSection.style.display = 'block';
+  if (loginSection) loginSection.style.display = 'none';
+  if (mainSection) mainSection.style.display = 'none';
+
+  // Events
+  const toggle = document.getElementById('toggleSwitch');
+  if (toggle) {
+    toggle.addEventListener('click', onToggleClicked);
+  }
+
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) loginBtn.addEventListener('click', onConnectAccount);
+
+  const skipBtn = document.getElementById('skipBtn');
+  if (skipBtn) skipBtn.addEventListener('click', () => showMain());
+
+  // Initial load and periodic refresh
+  refreshStatus().then(() => {
+    setInterval(refreshStatus, 30000);
+  });
 }
 
-async function requestEmergency() {
-    const reason = document.getElementById('emergencyReason').value.trim();
-    const resultEl = document.getElementById('emergencyResult');
-    
-    resultEl.innerHTML = '';
-    
-    if (!reason || reason.length < 20) {
-        resultEl.innerHTML = '<div class="result error">Please provide a detailed reason (at least 20 characters)</div>';
-        return;
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    const site = params.get('site') || 'instagram.com';
-
+function getStatus() {
+  return new Promise((resolve) => {
     try {
-        const response = await chrome.runtime.sendMessage({
-            type: 'REQUEST_EMERGENCY_ACCESS',
-            site: site,
-            reason: reason
-        });
-
-        if (response && response.granted) {
-            resultEl.innerHTML = `
-                <div class="result success">
-                    <strong>Access Granted!</strong><br>
-                    You have ${response.duration || 15} minutes of emergency access.<br>
-                    ${response.message || 'Use this time wisely.'}
-                </div>
-            `;
-            
-            // Redirect back after 3 seconds
-            setTimeout(() => {
-                window.location.href = 'https://' + site;
-            }, 3000);
+      chrome.runtime.sendMessage({ type: 'GET_STATUS' }, (res) => {
+        if (chrome.runtime.lastError) {
+          resolve(cachedStatus);
         } else {
-            resultEl.innerHTML = `
-                <div class="result error">
-                    <strong>Access Denied</strong><br>
-                    ${response?.message || 'Your reason was not sufficient for emergency access.'}
-                </div>
-            `;
+          resolve(res || cachedStatus);
         }
-    } catch (error) {
-        console.error('Emergency request failed:', error);
-        resultEl.innerHTML = '<div class="result error">Error: Could not connect to extension.</div>';
+      });
+    } catch (e) {
+      resolve(cachedStatus);
     }
+  });
+}
+
+async function refreshStatus() {
+  const status = await getStatus();
+  cachedStatus = status || cachedStatus;
+  updateUIFromStatus(cachedStatus);
+}
+
+function updateUIFromStatus(status) {
+  const loadingSection = document.getElementById('loadingSection');
+  const loginSection = document.getElementById('loginSection');
+  const mainSection = document.getElementById('mainSection');
+
+  if (loadingSection) loadingSection.style.display = 'none';
+  if (status && status.userId) {
+    showMain();
+  } else {
+    showLogin();
+  }
+
+  // Toggle state
+  const toggle = document.getElementById('toggleSwitch');
+  if (toggle) {
+    const enabled = !!status.isBlocking;
+    toggle.classList.toggle('active', enabled);
+  }
+
+  // Render stats
+  renderStats(status.dailyUsage || {}, status.dailyLimits || {});
+
+  function showLogin() {
+    if (loginSection) loginSection.style.display = 'block';
+    if (mainSection) mainSection.style.display = 'none';
+  }
+
+  function showMain() {
+    if (loginSection) loginSection.style.display = 'none';
+    if (mainSection) mainSection.style.display = 'block';
+  }
+}
+
+function showMain() {
+  const loginSection = document.getElementById('loginSection');
+  const mainSection = document.getElementById('mainSection');
+  if (loginSection) loginSection.style.display = 'none';
+  if (mainSection) mainSection.style.display = 'block';
+}
+
+function onToggleClicked() {
+  const toggle = document.getElementById('toggleSwitch');
+  const newState = !toggle.classList.contains('active');
+  try {
+    chrome.runtime.sendMessage({ type: 'TOGGLE_BLOCKING', enabled: newState }, (res) => {
+      if (!chrome.runtime.lastError && res && res.success) {
+        toggle.classList.toggle('active', newState);
+        cachedStatus.isBlocking = newState;
+      }
+    });
+  } catch (e) {
+    // noop
+  }
+}
+
+function onConnectAccount() {
+  const tokenInput = document.getElementById('tokenInput');
+  if (!tokenInput) return;
+  const token = (tokenInput.value || '').trim();
+  if (!token) return;
+
+  // Heuristic: if token looks like JSON { userId, email }, parse it; otherwise treat as userId
+  let userId = token;
+  let email = undefined;
+  try {
+    const parsed = JSON.parse(token);
+    if (parsed && (parsed.userId || parsed.id)) {
+      userId = parsed.userId || parsed.id;
+      email = parsed.email;
+    }
+  } catch (_) {
+    // not JSON; allow raw userId
+  }
+
+  try {
+    chrome.runtime.sendMessage({ type: 'SET_USER_ID', userId, email }, (res) => {
+      if (!chrome.runtime.lastError && res && res.success) {
+        showMain();
+        refreshStatus();
+      }
+    });
+  } catch (e) {
+    // noop
+  }
+}
+
+function renderStats(dailyUsage, dailyLimits) {
+  const container = document.getElementById('statsContainer');
+  if (!container) return;
+
+  const appIds = Object.keys(APP_ID_TO_DOMAIN);
+  if (!appIds.length) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+  for (const appId of appIds) {
+    const domain = APP_ID_TO_DOMAIN[appId];
+    const appName = APP_ID_TO_NAME[appId] || appId;
+    const usedSeconds = dailyUsage[domain] || 0;
+    const usedMinutes = Math.floor(usedSeconds / 60);
+    const limitMinutes = (dailyLimits[appId]?.dailyLimit ?? 60);
+    const percentage = Math.min(100, limitMinutes > 0 ? Math.round((usedMinutes / limitMinutes) * 100) : 0);
+
+    let fillClass = 'progress-fill';
+    if (percentage >= 100) fillClass += ' danger';
+    else if (percentage >= 75) fillClass += ' warning';
+
+    html += `
+      <div class="site-card">
+        <div class="site-header">
+          <div class="site-name">${appName}</div>
+          <div class="site-time">${formatMinutes(usedMinutes)}</div>
+        </div>
+        <div class="progress-bar">
+          <div class="${fillClass}" style="width: ${percentage}%"></div>
+        </div>
+        <div class="progress-text">${usedMinutes} / ${limitMinutes} min (${percentage}%)</div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+function formatMinutes(min) {
+  if (min >= 60) {
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return `${h}h ${m}m`;
+  }
+  return `${min}m`;
 }

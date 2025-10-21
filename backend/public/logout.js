@@ -1,4 +1,4 @@
-document.getElementById("logoutBtn").addEventListener("click", () => {
+document.getElementById("logoutBtn").addEventListener("click", async () => {
   // Clear from localStorage
   localStorage.removeItem("userId");
   localStorage.removeItem("userEmail");
@@ -11,6 +11,9 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
     });
   }
 
-  // Redirect to login page
+  // Destroy session on server then redirect
+  try {
+    await fetch('/logout', { credentials: 'include' });
+  } catch (_) {}
   window.location.href = "/login.html";
 });
